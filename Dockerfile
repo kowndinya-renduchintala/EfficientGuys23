@@ -4,12 +4,12 @@ RUN apt-get update  && apt-get install -y git python3-virtualenv wget
 
 WORKDIR /workspace
 
+RUN pip uninstall -y flash-attn
+RUN pip uninstall -y transformer-engine
+RUN pip install git+https://github.com/NVIDIA/TransformerEngine.git@stable
+
 COPY ./requirements.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
-ENV HUGGINGFACE_TOKEN="YOUR_TOKEN"
-ENV HUGGINGFACE_REPO="YOUR_USERNAME/YOUR_REPO"
-
 
 # Copy over single file server
 COPY ./main.py main.py

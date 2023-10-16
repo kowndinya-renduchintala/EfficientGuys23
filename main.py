@@ -5,20 +5,23 @@ import time
 
 import torch
 from huggingface_hub import login
-from transformers import LlamaTokenizer
+from transformers import AutoTokenizer
 from peft import PeftModel
-from transformers import LlamaForCausalLM
+from transformers import AutoModelForCausalLM
 
 HUGGINGFACE_TOKEN="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"
-HUGGINGFACE_REPO=""
+BASE_MODEL_NAME_OR_PATH="mistralai/Mistral-7B-v0.1"
+HUGGINGFACE_REPO="kowndinya23/flan2022-512-mistral-graphcut-logdet-20"
+
 
 def load_model(model_name, quantization):
-    model = LlamaForCausalLM.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         model_name,
         return_dict=True,
         load_in_8bit=quantization,
         device_map={"":0},
-        torch_dtype="auto"
+        torch_dtype="auto",
+        token=HUGGINGFACE_TOKEN
     )
     return model
 
@@ -27,7 +30,7 @@ def load_peft_model(model, peft_model):
     peft_model = PeftModel.from_pretrained(model, peft_model)
     return peft_model
 
-# torch.set_float32_matmul_precision("high")
+torch.set_float32_matmul_precision("high")
 
 from api import (
     ProcessRequest,
@@ -35,6 +38,8 @@ from api import (
     TokenizeRequest,
     TokenizeResponse,
     Token,
+    DecodeRequest,
+    DecodeResponse,
 )
 
 app = FastAPI()
@@ -45,12 +50,13 @@ logging.basicConfig(level=logging.INFO)
 
 login(token=HUGGINGFACE_TOKEN)
 
-model = load_model('meta-llama/Llama-2-7b-hf', False)
+model = load_model(BASE_MODEL_NAME_OR_PATH, False)
+
 # model = load_peft_model(model, HUGGINGFACE_REPO)
 
 model.eval()
 
-tokenizer = LlamaTokenizer.from_pretrained('meta-llama/Llama-2-7b-hf')
+tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME_OR_PATH, token=HUGGINGFACE_TOKEN)
 
 LLAMA2_CONTEXT_LENGTH = 4096
 
@@ -125,3 +131,10 @@ async def tokenize(input_data: TokenizeRequest) -> TokenizeResponse:
     t = time.perf_counter() - t0
     tokens = encoded["input_ids"]
     return TokenizeResponse(tokens=tokens, request_time=t)
+
+@app.post("/decode")
+async def decode(input_data: DecodeRequest) -> DecodeResponse:
+    t0 = time.perf_counter()
+    decoded = tokenizer.decode(input_data.tokens)
+    t = time.perf_counter() - t0
+    return DecodeResponse(text=decoded, request_time=t)
