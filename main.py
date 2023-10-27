@@ -11,7 +11,7 @@ from transformers import AutoModelForCausalLM
 
 HUGGINGFACE_TOKEN="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"
 BASE_MODEL_NAME_OR_PATH="mistralai/Mistral-7B-v0.1"
-HUGGINGFACE_REPO="kowndinya23/flan2022-512-mistral-graphcut-logdet-20"
+HUGGINGFACE_REPO="kowndinya23/flan2022-512-mistral-graphcut-logdet-sub11"
 
 
 def load_model(model_name, quantization):
@@ -52,7 +52,7 @@ login(token=HUGGINGFACE_TOKEN)
 
 model = load_model(BASE_MODEL_NAME_OR_PATH, False)
 
-# model = load_peft_model(model, HUGGINGFACE_REPO)
+model = load_peft_model(model, HUGGINGFACE_REPO)
 
 model.eval()
 
