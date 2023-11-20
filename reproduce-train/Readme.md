@@ -13,8 +13,9 @@ Generated artifacts pushed to HuggingFace Hub: [kowndinya23/flan2022-512-mistral
 
 Subset of FLAN 2022. The total dataset size is ~17.5M instances. However, the dataset used is a subset of size 450K.
 
-### TO DO
-Add script for dataset curation
+### Subset indices:
+FLAN 2022 contains 5 submixtures - FLAN 2021, T0, NIV2, COT, DIALOG
+The subset-indices directory contains the row IDs of the FLAN 2022 dataset that form the subset.
 
 ### How was the dataset created?
 First, filter out instances based on len(prompt)+len(response)<=512.
